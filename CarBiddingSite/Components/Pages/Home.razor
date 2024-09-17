@@ -1,0 +1,21 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+<AuthorizeView>
+    <Authorized>
+        <h1>@message</h1>
+    </Authorized>
+</AuthorizeView>
+
+Welcome to your new app.
+
+@code{
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    private string ?message { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        var authenticationState = await authenticationStateTask;
+        message = $"{authenticationState.User.Identity.Name} Welcome!";
+    }
+}

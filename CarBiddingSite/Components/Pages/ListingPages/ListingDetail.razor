@@ -1,0 +1,134 @@
+﻿@using CarBiddingSite.Models;
+@using CarBiddingSite.Models.CarModels;
+@using CarBiddingSite.Services;
+@inject CarService carService;
+@inject ListingServices listingServices;
+@page "/listings/{id:int}"
+@rendermode InteractiveServer
+
+@if (listing is null)
+{
+    <p>No car in here</p>
+}
+else
+{
+
+
+    @if (ShowEdit)
+    {
+        <div class="overlay">
+            <div class="edit-form">
+                <h2>Edit Car</h2>
+                <div class="form-group">
+                    <label>Title:</label>
+                    <input @bind="updatedListing.Title" />
+                </div>
+                <div class="form-group">
+                    <label>Price:</label>
+                    <input type="number" @bind="updatedListing.Price" />
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <textarea @bind="updatedListing.Description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Image URL:</label>
+                    <input @bind="updatedListing.ImageUrl" />
+                </div>
+                <button @onclick="HandleUpdate">Update</button>
+                <button @onclick="CloseEdit">Cancel</button>
+            </div>
+        </div>
+    }
+
+    @if (!ShowEdit)
+    {
+        <div class="container">
+            <AuthorizeView>
+                <Authorized>
+                    <button @onclick="EditCar">Edit</button>
+                </Authorized>
+            </AuthorizeView>
+            <div class="title-price">
+                <h1>@listing.Title</h1>
+                <h1>@FormatNumber(listing.Price)</h1>
+            </div>
+            <div class="image-container">
+                <img src="@listing.ImageUrl" alt="Listing Image" />
+            </div>
+            <div class="price-button">
+                <span>@FormatPrice(listing.Price)</span>
+                <button class="offer-button">Make Offer</button>
+            </div>
+            <div class="description">
+                <h4>@listing.Description</h4>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+    private Listing? listing;
+    private Listing updatedListing;
+    private bool ShowEdit = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        listing = await listingServices.GetListingById(id);
+        updatedListing = listing != null ? new Listing
+            {
+                Title = listing.Title,
+                Price = listing.Price,
+                Description = listing.Description,
+                ImageUrl = listing.ImageUrl,
+                Car = listing.Car
+            } : new Listing();
+    }
+
+    private string FormatPrice(decimal? price)
+    {
+        if (price is null)
+        {
+            throw new ArgumentNullException(nameof(price));
+        }
+        else
+        {
+            return price.Value.ToString("N0") + " TL";
+        }
+    }
+
+    private void EditCar()
+    {
+        ShowEdit = true;
+    }
+
+    private async Task HandleUpdate()
+    {
+        if (listing != null)
+        {
+            updatedListing.Id = listing.Id;
+            await listingServices.UpdateListingAsync(updatedListing);
+            listing = updatedListing;
+            ShowEdit = false;
+        }
+    }
+
+    private string FormatNumber(decimal? num)
+    {
+        if (num is null)
+        {
+            throw new ArgumentNullException(nameof(num));
+        }
+        else
+        {
+            return num.Value.ToString("0");
+        }
+    }
+
+    private void CloseEdit()
+    {
+        ShowEdit = false;
+    }
+}

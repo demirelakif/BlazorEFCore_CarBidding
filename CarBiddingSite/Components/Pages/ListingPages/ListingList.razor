@@ -1,0 +1,107 @@
+﻿@page "/cars"
+@using CarBiddingSite.Models;
+@using CarBiddingSite.Models.CarModels;
+@using CarBiddingSite.Services;
+@inject CarService _carService;
+@inject ListingServices listingServices;
+@inject NavigationManager navigationManager;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject AppDbContext appDbContext;
+@rendermode InteractiveServer
+
+<h3>Baykar</h3>
+<AuthorizeView>
+    <Authorized>
+        <button class="btn btn-primary" @onclick="ShowAddCar">Add New Listing</button>
+    </Authorized>
+</AuthorizeView>
+
+@if (IsVisible)
+{
+    <AddListing></AddListing>
+}
+
+@if (_listings.Count <= 0)
+{
+    <p>No Cars Available</p>
+}
+else
+{
+    <div class="card-grid">
+        @foreach (var car in _listings)
+        {
+            <div class="card">
+                @if (AuthenticatedUser is not null && car.UserId == AuthenticatedUser.Id)
+                {
+                    <span class="delete-icon" @onclick="() => HandleDeleteCar(car.Id, car.UserId)">&#10006;</span>
+                }
+                <img @onclick="() => HandleDetailButton(car.Id)" src="@car.ImageUrl" alt="Car Image" />
+                <div @onclick="() => HandleDetailButton(car.Id)" class="card-content">
+                    <h5 class="card-title">@car.Title</h5>
+                    <p class="card-text">@FormatPrice(car.Price)</p>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<Listing> _listings = new List<Listing>();
+    private bool IsVisible = false;
+    private User AuthenticatedUser;
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    private string FormatPrice(decimal? price)
+    {
+        if (price is null)
+        {
+            throw new ArgumentNullException(nameof(price));
+        }
+        else
+        {
+            return price.Value.ToString("N0") + " TL";
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authenticationState = await authenticationStateTask;
+        var username = authenticationState.User.Identity.Name;
+        AuthenticatedUser = appDbContext.Users.FirstOrDefault(u => u.UserName == username);
+        await LoadListingsAsync();
+    }
+
+    private async Task LoadListingsAsync()
+    {
+        var result = await listingServices.GetAllListingsAsync();
+        _listings = result.ToList();
+    }
+
+    private void HandleDetailButton(int id)
+    {
+        navigationManager.NavigateTo($"/cars/{id}");
+    }
+
+    private void ShowAddCar()
+    {
+        navigationManager.NavigateTo("/addCar");
+    }
+
+    private async Task HandleDeleteCar(int id, int userId)
+    {
+        if (AuthenticatedUser is not null && AuthenticatedUser.Id == userId)
+        {
+            var carToRemove = _listings.FirstOrDefault(c => c.Id == id);
+            if (carToRemove != null)
+            {
+                _listings.Remove(carToRemove);
+            }
+            await _carService.DeleteCarById(id);
+            StateHasChanged();
+            await LoadListingsAsync();
+
+
+        }
+    }
+}

@@ -1,0 +1,95 @@
+﻿/* Genel container stili */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+}
+
+/* Kart gridi stili */
+.card-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+/* Kart stili */
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 300px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    text-align: center;
+    position: relative; /* Pozisyonu ayarlamak için */
+}
+
+/* Kart başlığı stili */
+.card-title {
+    font-size: 1.25em;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+/* Kart fiyat stili */
+.card-text {
+    font-size: 1.1em;
+    color: #555;
+    margin: 0;
+}
+
+/* Kart resim stili */
+.card img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+/* Kart içeriği stili */
+.card-content {
+    padding: 10px;
+    flex-grow: 1;
+}
+
+/* Detaylara tıklama efekti */
+.card:hover {
+    cursor: pointer;
+    background-color: #f0f0f0;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Silme ikonu stili */
+.delete-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5em;
+    color: red;
+    cursor: pointer;
+    display: none; /* Varsayılan olarak gizli */
+}
+
+/* Silme ikonu göründüğünde */
+.card:hover .delete-icon {
+    display: block;
+}
+
+/* Buton stili */
+button {
+    margin: 10px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+}
+
+    button:hover {
+        background-color: #0056b3;
+    }
