@@ -25,21 +25,18 @@ namespace CarBiddingSite.Migrations
             modelBuilder.Entity("CarBiddingSite.Models.CarModels.Car", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("BrandId")
+                    b.Property<int>("BrandId")
                         .HasColumnType("int");
 
                     b.Property<int?>("Color")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("Km")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int>("Km")
+                        .HasColumnType("int");
 
-                    b.Property<int?>("ModelId")
+                    b.Property<int>("ModelId")
                         .HasColumnType("int");
 
                     b.Property<int>("Year")
@@ -82,7 +79,7 @@ namespace CarBiddingSite.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CarBrandId")
+                    b.Property<int>("CarBrandId")
                         .HasColumnType("int");
 
                     b.Property<int>("HP")
@@ -133,9 +130,6 @@ namespace CarBiddingSite.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CarId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime2");
 
@@ -158,8 +152,6 @@ namespace CarBiddingSite.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CarId");
 
                     b.HasIndex("UserId");
 
@@ -193,12 +185,22 @@ namespace CarBiddingSite.Migrations
             modelBuilder.Entity("CarBiddingSite.Models.CarModels.Car", b =>
                 {
                     b.HasOne("CarBiddingSite.Models.CarModels.CarBrand", "Brand")
-                        .WithMany()
-                        .HasForeignKey("BrandId");
+                        .WithMany("Cars")
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CarBiddingSite.Models.Listing", null)
+                        .WithOne("Car")
+                        .HasForeignKey("CarBiddingSite.Models.CarModels.Car", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("CarBiddingSite.Models.CarModels.CarModel", "Model")
-                        .WithMany()
-                        .HasForeignKey("ModelId");
+                        .WithMany("Cars")
+                        .HasForeignKey("ModelId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Brand");
 
@@ -207,9 +209,13 @@ namespace CarBiddingSite.Migrations
 
             modelBuilder.Entity("CarBiddingSite.Models.CarModels.CarModel", b =>
                 {
-                    b.HasOne("CarBiddingSite.Models.CarModels.CarBrand", null)
+                    b.HasOne("CarBiddingSite.Models.CarModels.CarBrand", "CarBrand")
                         .WithMany("CarModels")
-                        .HasForeignKey("CarBrandId");
+                        .HasForeignKey("CarBrandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CarBrand");
                 });
 
             modelBuilder.Entity("CarBiddingSite.Models.CarModels.DamageRecord", b =>
@@ -221,17 +227,11 @@ namespace CarBiddingSite.Migrations
 
             modelBuilder.Entity("CarBiddingSite.Models.Listing", b =>
                 {
-                    b.HasOne("CarBiddingSite.Models.CarModels.Car", "Car")
-                        .WithMany()
-                        .HasForeignKey("CarId");
-
                     b.HasOne("CarBiddingSite.Models.User", "User")
                         .WithMany("Listings")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Car");
 
                     b.Navigation("User");
                 });
@@ -244,6 +244,18 @@ namespace CarBiddingSite.Migrations
             modelBuilder.Entity("CarBiddingSite.Models.CarModels.CarBrand", b =>
                 {
                     b.Navigation("CarModels");
+
+                    b.Navigation("Cars");
+                });
+
+            modelBuilder.Entity("CarBiddingSite.Models.CarModels.CarModel", b =>
+                {
+                    b.Navigation("Cars");
+                });
+
+            modelBuilder.Entity("CarBiddingSite.Models.Listing", b =>
+                {
+                    b.Navigation("Car");
                 });
 
             modelBuilder.Entity("CarBiddingSite.Models.User", b =>

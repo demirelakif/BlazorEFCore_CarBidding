@@ -3,7 +3,7 @@
     public class DamageRecord
     {
         public int Id { get; set; }
-        public required DamageType DamageType { get; set; }
+        public CarBiddingSite.Models.CarModels.DamageType DamageType { get; set; }
         public string? Description { get; set; }
         public DateTime? Time { get; set; }
 

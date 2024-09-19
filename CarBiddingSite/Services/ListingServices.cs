@@ -27,6 +27,7 @@ namespace CarBiddingSite.Services
         public async Task AddListingAsync(Listing listing)
         {
             using var context = await _dbContextFactory.CreateDbContextAsync();
+            Console.WriteLine("AddListing", listing.Price);
             await context.Listings.AddAsync(listing);
             await context.SaveChangesAsync();
         }

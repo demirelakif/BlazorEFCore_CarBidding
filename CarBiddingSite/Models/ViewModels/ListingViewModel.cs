@@ -15,15 +15,17 @@ namespace CarBiddingSite.Models.ViewModels
 
         [Required(ErrorMessage = "Please provide a price for the listing")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
-        public decimal? Price { get; set; }
+        public int Price { get; set; }
 
         public string? ImageUrl { get; set; }
 
         public int? SelectedBrandId { get; set; }  // Brand ID for dropdown selection
         public int? SelectedModelId { get; set; }  // Model ID for dropdown selection
-        public int? SelectedDamageRecordId { get; set; }  // Damage record ID for dropdown selection
-
+        public CarBiddingSite.Models.CarModels.DamageType SelectedDamageType { get; set; }  // Damage record ID for dropdown selection
+        public string? SelectedDamageDescription { get; set; }
+        public DateTime SelectedDamageDate{ get; set; }
         public DateTime? CreatedDate { get; set; }
+        public ICollection<DamageRecord> DamageRecords { get; set; } = new List<DamageRecord>();
 
         public Car Car { get; set; } = new Car();
 
@@ -33,6 +35,7 @@ namespace CarBiddingSite.Models.ViewModels
         {
             CreatedDate = DateTime.UtcNow;
         }
+
 
         public enum Color
         {

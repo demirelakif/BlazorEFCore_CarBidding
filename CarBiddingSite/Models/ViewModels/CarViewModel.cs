@@ -16,7 +16,7 @@ namespace CarBiddingSite.Models.ViewModels
 
         public CarModel? Model { get; set; }
 
-        public decimal? Km { get; set; }
+        public int Km { get; set; }
 
         [Required(ErrorMessage = "Please select a color")]
         public required Color SelectedColor { get; set; }

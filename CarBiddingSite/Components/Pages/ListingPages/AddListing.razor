@@ -2,121 +2,180 @@
 @using CarBiddingSite.Models
 @using CarBiddingSite.Models.CarModels
 @using CarBiddingSite.Models.ViewModels
-@using CarBiddingSite.Services;
+@using CarBiddingSite.Services
 @using Microsoft.AspNetCore.Authorization
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject CarService _carService
+@inject ListingServices _listingService;
 @inject AppDbContext appDbContext
 @inject NavigationManager navigationManager
 @attribute [Authorize(Roles = "User,Admin")]
 @rendermode InteractiveServer
 
-<h3>Add Listing</h3>
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 rounded-lg">
+        <div class="card-body">
+            <h3 class="card-title mb-4">Add Listing</h3>
 
-<EditForm Model="@Model" OnValidSubmit="HandleAddListing" FormName="AddListingForm">
-    <DataAnnotationsValidator />
-    <div class="form-group">
-        <label for="brand">Car Brand:</label>
-        <select id="brand" class="form-control" @onchange="OnBrandChanged">
-            <option value="">Select a Brand</option>
-            @foreach (var brand in CarBrands)
-            {
-                <option value="@brand.Id">@brand.Name</option>
-            }
-        </select>
+            <EditForm Model="@Model" OnValidSubmit="HandleAddListing">
+                <DataAnnotationsValidator />
 
+                <div class="form-group">
+                    <label for="brand">Car Brand:</label>
+                    <select id="brand" class="form-control" @onchange="OnBrandChanged">
+                        <option value="">Select a Brand</option>
+                        @foreach (var brand in CarBrands)
+                        {
+                            <option value="@brand.Id">@brand.Name</option>
+                        }
+                    </select>
+                    <ValidationMessage For="@(() => Model.SelectedBrandId)" />
+                </div>
 
-        <ValidationMessage For="@(() => Model.SelectedBrandId)" />
+                <div class="form-group">
+                    <label for="model">Car Model:</label>
+                    <select id="model" class="form-control" @bind="Model.SelectedModelId">
+                        <option value="">Select a Model</option>
+                        @foreach (var model in CarModels)
+                        {
+                            <option value="@model.Id">@model.ModelName</option>
+                        }
+                    </select>
+                    <ValidationMessage For="@(() => Model.SelectedModelId)" />
+                </div>
+
+                <div class="form-group">
+                    <label for="km">Kilometers:</label>
+                    <InputNumber id="km" class="form-control" @bind-Value="Model.Car.Km" />
+                    <ValidationMessage For="@(() => Model.Car.Km)" />
+                </div>
+
+                <div class="form-group">
+                    <label for="title">Listing Title:</label>
+                    <InputText id="title" class="form-control" @bind-Value="Model.Title" />
+                    <ValidationMessage For="@(() => Model.Title)" />
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Listing Description:</label>
+                    <InputTextArea id="description" class="form-control" @bind-Value="Model.Description" />
+                    <ValidationMessage For="@(() => Model.Description)" />
+                </div>
+
+                <div class="form-group">
+                    <label for="price">Price:</label>
+                    <InputNumber id="price" class="form-control" @bind-Value="Model.Price" @onchange="OnPriceChange"/>
+                    <ValidationMessage For="@(() => Model.Price)" />
+                </div>
+
+                <h5 class="mt-4">Add Damage Records:</h5>
+
+                <div class="form-group">
+                    <label for="damageType">Damage Type:</label>
+                    <select id="damageType" class="form-control" @bind="Model.SelectedDamageType">
+                        <option value="">Select Damage Type</option>
+                        @foreach (var damageType in Enum.GetValues(typeof(CarBiddingSite.Models.CarModels.DamageType)))
+                        {
+                            <option value="@damageType">@damageType</option>
+                        }
+                    </select>
+                    <ValidationMessage For="@(() => Model.SelectedDamageType)" />
+                </div>
+
+                <div class="form-group">
+                    <label for="damageDescription">Damage Description:</label>
+                    <InputText id="damageDescription" class="form-control" @bind-Value="Model.SelectedDamageDescription" />
+                    <ValidationMessage For="@(() => Model.SelectedDamageDescription)" />
+                </div>
+
+                <div class="form-group">
+                    <label for="damageDate">Damage Date:</label>
+                    <InputDate id="damageDate" class="form-control" @bind-Value="Model.SelectedDamageDate" />
+                    <ValidationMessage For="@(() => Model.SelectedDamageDate)" />
+                </div>
+
+                <button type="button" class="btn btn-primary" @onclick="AddDamageRecord">Add Damage Record</button>
+
+                @if (Model.DamageRecords.Any())
+                {
+                    <h5 class="mt-4">Added Damage Records:</h5>
+                    <ul class="list-group">
+                        @foreach (var record in Model.DamageRecords)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @record.DamageType - @record.Description - @record.Time.ToString()
+                                <button class="btn btn-danger btn-sm" @onclick="() => RemoveDamageRecord(record)">Remove</button>
+                            </li>
+                        }
+                    </ul>
+                }
+
+                <div class="form-group">
+                    <label for="year">Year:</label>
+                    <InputNumber id="year" class="form-control" @bind-Value="Model.Car.Year" />
+                    <ValidationMessage For="@(() => Model.Car.Year)" />
+                </div>
+
+                <div class="form-group">
+                    <label for="image">Image URL:</label>
+                    <InputText id="image" class="form-control" @bind-Value="Model.ImageUrl" />
+                    <ValidationMessage For="@(() => Model.ImageUrl)" />
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Add Listing</button>
+            </EditForm>
+        </div>
     </div>
-
-    <div class="form-group">
-        <label for="model">Car Model:</label>
-        <select id="model" class="form-control" @bind="Model.SelectedModelId">
-            <option value="">Select a Model</option>
-            @foreach (var model in CarModels)
-            {
-                <option value="@model.Id">@model.ModelName</option>
-            }
-        </select>
-        <ValidationMessage For="@(() => Model.SelectedModelId)" />
-    </div>
-
-@*     <div class="form-group">
-        <label for="damageRecord">Damage Record:</label>
-        <select id="damageRecord" class="form-control" @bind="Model.SelectedDamageRecordId">
-            <option value="">Select Damage Record</option>
-            @foreach (var damage in DamageRecords)
-            {
-                <option value="@damage.Id">@damage.DamageType</option>
-            }
-        </select>
-        <ValidationMessage For="@(() => Model.SelectedDamageRecordId)" />
-    </div> *@
-
-    <div class="form-group">
-        <label for="km">Kilometers:</label>
-        <InputNumber id="km" class="form-control" @bind-Value="Model.Car.Km" />
-        <ValidationMessage For="@(() => Model.Car.Km)" />
-    </div>
-
-    @*     <div class="form-group">
-    <label for="color">Color:</label>
-    <select id="color" class="form-control" @bind="Model.Car.Color">
-    @foreach (var color in Enum.GetValues<Color>())
-    {
-    <option value="@color">@color</option>
-    }
-    </select>
-    <ValidationMessage For="@(() => Model.Car.Color)" />
-    </div> *@
-
-    <div class="form-group">
-        <label for="year">Year:</label>
-        <InputNumber id="year" class="form-control" @bind-Value="Model.Car.Year" />
-        <ValidationMessage For="@(() => Model.Car.Year)" />
-    </div>
-
-    <div class="form-group">
-        <label for="image">Image URL:</label>
-        <InputText id="image" class="form-control" @bind-Value="Model.ImageUrl" />
-        <ValidationMessage For="@(() => Model.ImageUrl)" />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Add Listing</button>
-</EditForm>
+</div>
 
 @code {
     [SupplyParameterFromForm]
     public ListingViewModel Model { get; set; } = new();
     private List<CarBrand> CarBrands { get; set; } = new List<CarBrand>();
     private List<CarModel> CarModels { get; set; } = new List<CarModel>();
-    // private List<DamageRecord> DamageRecords { get; set; } = new List<DamageRecord>();
+    private String FormattedPrice {get;set;}
 
     protected override async Task OnInitializedAsync()
     {
         CarBrands = await _carService.GetAllCarBrandsAsync();
-        // Console.WriteLine(CarBrands);
-        //DamageRecords = await _carService.GetAllDamageRecordsAsync();
     }
 
     private async Task OnBrandChanged(ChangeEventArgs e)
     {
         if (e.Value != null && int.TryParse(e.Value.ToString(), out var brandId))
         {
-            Console.WriteLine($"BrandId: {brandId}");
             CarModels = await _carService.GetCarModelsByBrandIdAsync(brandId);
-            Console.WriteLine("Car Modelleri Sayısı:", CarModels.Count());
+            Model.SelectedBrandId = brandId;
             StateHasChanged(); // Refresh the view to show the new models
-        }
-        else
-        {
-            Console.WriteLine("Invalid or missing brand ID.");
         }
     }
 
+    private async Task OnPriceChange(ChangeEventArgs e)
+    {
+        FormattedPrice = Model.Price.ToString("N0");
+    }
+
+    private void AddDamageRecord()
+    {
+        var damageRecord = new DamageRecord
+            {
+                DamageType = Model.SelectedDamageType,
+                Description = Model.SelectedDamageDescription,
+                Time = Model.SelectedDamageDate
+            };
+        Model.DamageRecords.Add(damageRecord);
+
+    }
+
+    private void RemoveDamageRecord(DamageRecord record)
+    {
+        Model.DamageRecords.Remove(record);
+        StateHasChanged();
+    }
 
     private async Task HandleAddListing()
     {
+        Console.WriteLine("geldihandle");
         var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = appDbContext.Users
             .Where(u => u.UserName == authenticationState.User.Identity.Name)
@@ -128,16 +187,15 @@
             return;
         }
 
-        var carModel = appDbContext.CarModels.Where(m => m.Id == Model.SelectedModelId).FirstOrDefault();
+        var carModel = appDbContext.CarModels.Where(b => b.Id == Model.SelectedModelId).FirstOrDefault();
         var carBrand = appDbContext.CarBrands.Where(b => b.Id == Model.SelectedBrandId).FirstOrDefault();
 
         var newCar = new Car
             {
-                Brand = carBrand,
-                Model = carModel,
+                BrandId= carBrand.Id,
+                ModelId = carModel.Id,
                 Km = Model.Car.Km,
                 Year = Model.Car.Year,
-
             };
 
         var newListing = new Listing
@@ -148,10 +206,10 @@
                 ImageUrl = Model.ImageUrl,
                 UserId = user.Id,
                 Car = newCar
-                // Add additional properties if needed
             };
 
-        await _carService.AddCarAsync(newCar);
+        await _listingService.AddListingAsync(newListing);
+
         navigationManager.NavigateTo("/cars");
     }
 }
