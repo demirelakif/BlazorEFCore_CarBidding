@@ -1,0 +1,207 @@
+﻿@page "/adminPanel"
+@using CarBiddingSite.Models
+@using CarBiddingSite.Models.CarModels
+@using CarBiddingSite.ViewModels
+@using Microsoft.AspNetCore.Authorization
+@inject CarBiddingSite.Services.CarService _carService;
+@attribute [Authorize(Roles = "Admin")];
+@inject NavigationManager navigationManager;
+@rendermode InteractiveServer
+<h3 class="header-title">Add Brand Or Model</h3>
+
+<div class="container mt-5">
+    @if (!string.IsNullOrEmpty(WarningMessage))
+    {
+        <div class="alert alert-warning">
+            @WarningMessage
+        </div>
+    }
+    <div class="card shadow-lg border-0 rounded-lg form-container">
+        <div class="card-body">
+            <EditForm Model="@BrandModel" OnValidSubmit="HandleForm">
+                <h5 class="sub-header">Select Or Add New Brand</h5>
+                <div class="button-group">
+                    <button type="button" class="btn @(!showNewBrandInputs ? "btn-success" : "btn-danger")" @onclick="HandleButton">
+                        @(!showNewBrandInputs ? "New Brand" : "Select Brand")
+                    </button>
+                </div>
+
+                @if (showNewBrandInputs)
+                {
+                    <div class="form-group mt-3">
+                        <label for="name">Brand Name:</label>
+                        <InputText id="name" class="form-control" @bind-Value="BrandModel.Name" />
+                        <ValidationMessage For="@(() => BrandModel.Name)" />
+                    </div>
+                    <div class="form-group">
+                        <label for="originCountry">Brand Origin Country:</label>
+                        <InputText id="originCountry" class="form-control" @bind-Value="BrandModel.OriginCountry" />
+                        <ValidationMessage For="@(() => BrandModel.OriginCountry)" />
+                    </div>
+                }
+                else
+                {
+                    <div class="form-group mt-3">
+                        <label for="brand">Select Brand:</label>
+                        <select id="brand" class="form-control" @bind="BrandModel.SelectedBrandId">
+                            <option value="">Select a Brand</option>
+                            @foreach (var brand in CarBrands)
+                            {
+                                <option value="@brand.Id">@brand.Name</option>
+                            }
+                        </select>
+                        <ValidationMessage For="@(() => BrandModel.SelectedBrandId)" />
+                    </div>
+                }
+                <hr />
+
+                <div class="button-group">
+                    <button type="button" class="btn @(!showNewModelInputs ? "btn-success" : "btn-danger")" @onclick="HandleModelButton">
+                        @(!showNewModelInputs ? "Add New Model" : "Back")
+                    </button>
+                </div>
+
+                @if (showNewModelInputs && (BrandModel.SelectedBrandId >= 1 || BrandModel.Name is not null))
+                {
+                    <h5 class="sub-header mt-3">Add New Model</h5>
+                    <div class="form-group">
+                        <label for="modelName">Model Name:</label>
+                        <InputText id="modelName" class="form-control" @bind-Value="CarModelModel.ModelName" />
+                        <ValidationMessage For="@(() => CarModelModel.ModelName)" />
+                    </div>
+                    <div class="form-group">
+                        <label for="hp">HP (HorsePower):</label>
+                        <InputNumber id="hp" class="form-control" @bind-Value="CarModelModel.HP" />
+                        <ValidationMessage For="@(() => CarModelModel.HP)" />
+                    </div>
+                }
+                <br />
+                <button type="submit" class="btn btn-primary w-100">Add</button>
+            </EditForm>
+        </div>
+    </div>
+
+    <div class="brand-container mt-5">
+        @foreach (var brand in CarBrands)
+        {
+            <div class="brand-item card shadow-sm mb-3">
+                <div class="card-body" @onclick="()=>{HandleBrandClicked(brand.Id);}">
+                    <h3 class="brand-name">
+                        @brand.Name
+                        <span class="toggle-icon">@((brandToggleStates.ContainsKey(brand.Id) && brandToggleStates[brand.Id].isOpen) ? "-" : "+")</span>
+                    </h3>
+                </div>
+
+                @if (brandToggleStates.ContainsKey(brand.Id) && brandToggleStates[brand.Id].isOpen)
+                {
+                    <ul class="models-container list-group list-group-flush">
+                        @foreach (var carModel in brandToggleStates[brand.Id].carModel)
+                        {
+                            <li class="list-group-item model-name">@carModel.ModelName</li>
+                        }
+                    </ul>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    public CarBrandViewModel BrandModel { get; set; } = new();
+    public CarModelViewModel CarModelModel { get; set; } = new();
+    private List<CarBrand> CarBrands { get; set; } = new();
+    private bool showNewBrandInputs { get; set; } = false;
+    private bool showNewModelInputs { get; set; } = false;
+    private Dictionary<int, (bool isOpen, List<CarModel> carModel)> brandToggleStates = new();
+    private string WarningMessage;
+
+    private async Task HandleForm()
+    {
+        if (BrandModel.Name is not null && BrandModel.OriginCountry is not null && showNewBrandInputs is true)
+        {
+            CarBrand newBrand = new CarBrand { Name = BrandModel.Name is not null ? BrandModel.Name : "", OriginCountry = BrandModel.OriginCountry };
+            await _carService.AddBrandAsync(newBrand);
+            FillDictionary();
+        }
+
+
+        if (BrandModel.SelectedBrandId >= 1 && showNewBrandInputs is false && showNewModelInputs is true)
+        {
+            CarModel newCarModel = new CarModel { CarBrandId = BrandModel.SelectedBrandId, ModelName = CarModelModel.ModelName, HP = CarModelModel.HP };
+            await _carService.AddModelAsync(newCarModel);
+            FillDictionary();
+        }
+
+        if (BrandModel.Name is not null && BrandModel.OriginCountry is not null && showNewBrandInputs is true && showNewModelInputs is true)
+        {
+            CarBrand newBrand = new CarBrand { Name = BrandModel.Name is not null ? BrandModel.Name : "", OriginCountry = BrandModel.OriginCountry };
+            await _carService.AddBrandAsync(newBrand);
+            CarModel newCarModel = new CarModel { CarBrandId = newBrand.Id, ModelName = CarModelModel.ModelName, HP = CarModelModel.HP };
+            await _carService.AddModelAsync(newCarModel);
+            FillDictionary();
+        }
+
+    }
+    private async Task HandleBrandClicked(int brandId)
+    {
+        if (brandToggleStates.ContainsKey(brandId))
+        {
+            brandToggleStates[brandId] = (!brandToggleStates[brandId].isOpen, brandToggleStates[brandId].carModel);
+        }
+        else
+        {
+            var results = await _carService.GetCarModelsByBrandIdAsync(brandId);
+            brandToggleStates.Add(brandId, (true, results.ToList()));
+        }
+    }
+    private async Task GetBrands()
+    {
+        CarBrands = await _carService.GetAllCarBrandsAsync();
+    }
+
+    private void FillDictionary()
+    {
+        foreach (var brand in CarBrands)
+        {
+            if (brandToggleStates.ContainsKey(brand.Id))
+            {
+                brandToggleStates[brand.Id] = (brandToggleStates[brand.Id].isOpen, brand.CarModels is not null ? brand.CarModels.ToList() : new List<CarModel>());
+            }
+            else
+            {
+                
+                brandToggleStates.Add(brand.Id, (false, brand.CarModels is not null ? brand.CarModels.ToList() : new List<CarModel>()));
+            }
+
+        }
+
+    }
+
+    private void HandleButton()
+    {
+        showNewBrandInputs = !showNewBrandInputs;
+    }
+
+    private void HandleModelButton()
+    {
+        showNewModelInputs = !showNewModelInputs;
+        Console.WriteLine(showNewModelInputs);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetBrands();
+        FillDictionary();
+        _carService.OnWarning += HandleWarning;
+    }
+
+
+    private Task HandleWarning(string message)
+    {
+        WarningMessage = message;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+}

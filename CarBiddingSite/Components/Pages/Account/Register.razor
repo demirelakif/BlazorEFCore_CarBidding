@@ -45,7 +45,7 @@
             Console.WriteLine(newUser.UserName);
             await appDbContext.Users.AddAsync(newUser);
             await appDbContext.SaveChangesAsync();
-            navigationManager.NavigateTo("/cars");
+            navigationManager.NavigateTo("/listings");
         }
         else
         {

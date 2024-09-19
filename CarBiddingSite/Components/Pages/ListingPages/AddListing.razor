@@ -1,4 +1,4 @@
-﻿@page "/addCar"
+﻿@page "/addListing"
 @using CarBiddingSite.Models
 @using CarBiddingSite.Models.CarModels
 @using CarBiddingSite.Models.ViewModels
@@ -9,7 +9,7 @@
 @inject ListingServices _listingService;
 @inject AppDbContext appDbContext
 @inject NavigationManager navigationManager
-@attribute [Authorize(Roles = "User,Admin")]
+@attribute [Authorize(Roles = "User,Admin")]    
 @rendermode InteractiveServer
 
 <div class="container mt-5">
@@ -64,7 +64,7 @@
 
                 <div class="form-group">
                     <label for="price">Price:</label>
-                    <InputNumber id="price" class="form-control" @bind-Value="Model.Price" @onchange="OnPriceChange"/>
+                    <InputNumber id="price" class="form-control" @bind-Value="Model.Price"/>
                     <ValidationMessage For="@(() => Model.Price)" />
                 </div>
 
@@ -133,7 +133,6 @@
     public ListingViewModel Model { get; set; } = new();
     private List<CarBrand> CarBrands { get; set; } = new List<CarBrand>();
     private List<CarModel> CarModels { get; set; } = new List<CarModel>();
-    private String FormattedPrice {get;set;}
 
     protected override async Task OnInitializedAsync()
     {
@@ -148,11 +147,6 @@
             Model.SelectedBrandId = brandId;
             StateHasChanged(); // Refresh the view to show the new models
         }
-    }
-
-    private async Task OnPriceChange(ChangeEventArgs e)
-    {
-        FormattedPrice = Model.Price.ToString("N0");
     }
 
     private void AddDamageRecord()

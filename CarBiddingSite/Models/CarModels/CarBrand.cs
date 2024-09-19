@@ -5,8 +5,8 @@
         public int Id { get; set; }
         public required string Name { get; set; }
         public string? OriginCountry { get; set; }
-        public required ICollection<CarModel> CarModels { get; set; }
-        public required ICollection<Car> Cars { get; set; }
+        public ICollection<CarModel> ?CarModels { get; set; }
+        public ICollection<Car> ?Cars { get; set; }
 
     }
 }

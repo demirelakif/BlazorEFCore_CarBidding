@@ -1,4 +1,4 @@
-﻿@page "/cars"
+﻿@page "/listings"
 @using CarBiddingSite.Models;
 @using CarBiddingSite.Models.CarModels;
 @using CarBiddingSite.Services;
@@ -85,7 +85,7 @@ else
 
     private void ShowAddCar()
     {
-        navigationManager.NavigateTo("/addCar");
+        navigationManager.NavigateTo("/addListing");
     }
 
     private async Task HandleDeleteCar(int id, int userId)

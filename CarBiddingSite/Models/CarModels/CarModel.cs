@@ -7,6 +7,6 @@
         public CarBrand ?CarBrand { get; set; }
         public string? ModelName { get; set; }
         public int HP { get; set; }
-        public required ICollection<Car> Cars { get; set; }
+        public ICollection<Car>? Cars { get; set; }
     }
 }
