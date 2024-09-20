@@ -1,5 +1,4 @@
 ﻿@using CarBiddingSite.Models;
-@using CarBiddingSite.Models.CarModels;
 @using CarBiddingSite.Services;
 @inject CarService carService;
 @inject ListingServices listingServices;
@@ -12,8 +11,6 @@
 }
 else
 {
-
-
     @if (ShowEdit)
     {
         <div class="overlay">
@@ -46,22 +43,55 @@ else
         <div class="container">
             <AuthorizeView>
                 <Authorized>
-                    <button @onclick="EditCar">Edit</button>
+                    <button class="btn btn-primary" @onclick="EditCar">Edit</button>
                 </Authorized>
             </AuthorizeView>
             <div class="title-price">
                 <h1>@listing.Title</h1>
-                <h1>@FormatNumber(listing.Price)</h1>
+                <h1>@FormatPrice(listing.Price)</h1>
             </div>
             <div class="image-container">
-                <img src="@listing.ImageUrl" alt="Listing Image" />
+                <img src="@listing.ImageUrl" alt="Listing Image" class="img-fluid" />
             </div>
-            <div class="price-button">
+            <div class="car-details mt-4">
+                <h4>Car Details</h4>
+                <ul class="list-group">
+                    @if(listing.Car.Brand is not null && listing.Car.Model is not null)
+                    {
+                        <li class="list-group-item"><strong>Brand:</strong> @listing.Car.Brand.Name</li>
+                        <li class="list-group-item"><strong>Origin Country:</strong> @listing.Car.Brand.OriginCountry</li>
+                        <li class="list-group-item"><strong>Model:</strong> @listing.Car.Model.ModelName</li>
+                        <li class="list-group-item"><strong>Horsepower:</strong> @listing.Car.Model.HP</li>
+                    }
+                </ul>
+            </div>
+            <div class="damage-records mt-4">
+                <h4>Damage Records</h4>
+                @if (listing.Car.DamageRecords.Any())
+                {
+                    <ul class="list-group">
+                        @foreach (var record in listing.Car.DamageRecords)
+                        {
+                            <li class="list-group-item">
+                                <strong>Date:</strong> @record.Time <br />
+                                <strong>Type:</strong> @record.DamageType <br />
+                                <strong>Description:</strong> @record.Description
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>No damage records available.</p>
+                }
+            </div>
+            <div class="price-button mt-4">
                 <span>@FormatPrice(listing.Price)</span>
-                <button class="offer-button">Make Offer</button>
+                <button class="btn btn-success">Make Offer</button>
             </div>
-            <div class="description">
-                <h4>@listing.Description</h4>
+            <div class="description mt-4">
+                <h4>Description</h4>
+                <p>@listing.Description</p>
             </div>
         </div>
     }
@@ -77,6 +107,10 @@ else
     protected override async Task OnInitializedAsync()
     {
         listing = await listingServices.GetListingById(id);
+        if (listing.Car.Model.ModelName is not null)
+        {
+            Console.WriteLine(listing.Car.Model.ModelName);
+        }
         updatedListing = listing != null ? new Listing
             {
                 Title = listing.Title,

@@ -56,6 +56,18 @@ namespace CarBiddingSite.Services
             
         }
 
+        public async Task DeleteBrandById(int id)
+        {
+            using var context = await _dbContextFactory.CreateDbContextAsync();
+            await context.CarBrands.Where(brand => brand.Id == id).ExecuteDeleteAsync();
+        }
+
+        public async Task DeleteCarModelById(int id)
+        {
+            using var context = await _dbContextFactory.CreateDbContextAsync();
+            await context.CarModels.Where(model => model.Id == id).ExecuteDeleteAsync();
+        }
+
         public async Task AddModelAsync(CarModel carModel)
         {
             using var context = await _dbContextFactory.CreateDbContextAsync();
@@ -84,9 +96,9 @@ namespace CarBiddingSite.Services
         public async Task<Car> AddCarAsync(Car car)
         {
             using var context = await _dbContextFactory.CreateDbContextAsync();
-
-            context.Cars.Add(car);
+            await context.Cars.AddAsync(car);
             await context.SaveChangesAsync();
+            Console.WriteLine("Car Eklendi----------------------------------------");
             return car;
         }
 

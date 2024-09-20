@@ -8,6 +8,8 @@
         public CarBrand? Brand { get; set; }
         public int ModelId { get; set; }
         public CarModel? Model { get; set; }
+        public Listing ?Listing { get; set; }
+        public int ListingId { get; set; }
         public ICollection<DamageRecord>? DamageRecords { get; set; }
         public int Km { get; set; }
         public Color? Color { get; set; }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CarBiddingSite.Migrations
 {
     /// <inheritdoc />
-    public partial class DeleteBehaviors : Migration
+    public partial class migra : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -90,10 +90,12 @@ namespace CarBiddingSite.Migrations
                 name: "Cars",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Year = table.Column<int>(type: "int", nullable: false),
                     BrandId = table.Column<int>(type: "int", nullable: false),
                     ModelId = table.Column<int>(type: "int", nullable: false),
+                    ListingId = table.Column<int>(type: "int", nullable: false),
                     Km = table.Column<int>(type: "int", nullable: false),
                     Color = table.Column<int>(type: "int", nullable: true)
                 },
@@ -113,8 +115,8 @@ namespace CarBiddingSite.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Cars_Listings_Id",
-                        column: x => x.Id,
+                        name: "FK_Cars_Listings_ListingId",
+                        column: x => x.ListingId,
                         principalTable: "Listings",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -150,6 +152,12 @@ namespace CarBiddingSite.Migrations
                 name: "IX_Cars_BrandId",
                 table: "Cars",
                 column: "BrandId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Cars_ListingId",
+                table: "Cars",
+                column: "ListingId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Cars_ModelId",

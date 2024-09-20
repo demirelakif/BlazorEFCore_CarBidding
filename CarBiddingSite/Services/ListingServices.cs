@@ -23,6 +23,7 @@ namespace CarBiddingSite.Services
         {
             using var context = await _dbContextFactory.CreateDbContextAsync();
             return await context.Listings.FirstOrDefaultAsync(l => l.Id == id);
+
         }
         public async Task AddListingAsync(Listing listing)
         {

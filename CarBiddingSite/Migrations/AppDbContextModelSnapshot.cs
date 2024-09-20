@@ -25,7 +25,10 @@ namespace CarBiddingSite.Migrations
             modelBuilder.Entity("CarBiddingSite.Models.CarModels.Car", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BrandId")
                         .HasColumnType("int");
@@ -34,6 +37,9 @@ namespace CarBiddingSite.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Km")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ListingId")
                         .HasColumnType("int");
 
                     b.Property<int>("ModelId")
@@ -45,6 +51,9 @@ namespace CarBiddingSite.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BrandId");
+
+                    b.HasIndex("ListingId")
+                        .IsUnique();
 
                     b.HasIndex("ModelId");
 
@@ -190,9 +199,9 @@ namespace CarBiddingSite.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("CarBiddingSite.Models.Listing", null)
+                    b.HasOne("CarBiddingSite.Models.Listing", "Listing")
                         .WithOne("Car")
-                        .HasForeignKey("CarBiddingSite.Models.CarModels.Car", "Id")
+                        .HasForeignKey("CarBiddingSite.Models.CarModels.Car", "ListingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -203,6 +212,8 @@ namespace CarBiddingSite.Migrations
                         .IsRequired();
 
                     b.Navigation("Brand");
+
+                    b.Navigation("Listing");
 
                     b.Navigation("Model");
                 });

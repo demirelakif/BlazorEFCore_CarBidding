@@ -37,9 +37,8 @@ namespace CarBiddingSite
 
             modelBuilder.Entity<Listing>()
                 .HasOne(l => l.Car)
-                .WithOne() // Bir Listing'in yalnızca bir Car'ı olabilir
-                .HasForeignKey<Car>(c => c.Id) // Car'ın Id'si Listing'in foreign key'i
-                .OnDelete(DeleteBehavior.Cascade); // Listing silindiğinde ilişkili Car silinir
+                .WithOne(c => c.Listing) // Car'ın yalnızca bir Listing'i olabilir
+                .OnDelete(DeleteBehavior.Cascade); // Listing silindiğinde ilişkili Car da silinir
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Listings)

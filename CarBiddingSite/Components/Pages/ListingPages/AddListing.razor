@@ -181,6 +181,16 @@
             return;
         }
 
+        var newListing = new Listing
+            {
+                Title = Model.Title,
+                Description = Model.Description,
+                Price = Model.Price,
+                ImageUrl = Model.ImageUrl,
+                UserId = user.Id,
+            };
+        await _listingService.AddListingAsync(newListing);
+
         var carModel = appDbContext.CarModels.Where(b => b.Id == Model.SelectedModelId).FirstOrDefault();
         var carBrand = appDbContext.CarBrands.Where(b => b.Id == Model.SelectedBrandId).FirstOrDefault();
 
@@ -190,20 +200,14 @@
                 ModelId = carModel.Id,
                 Km = Model.Car.Km,
                 Year = Model.Car.Year,
+                ListingId = newListing.Id
             };
+        Console.WriteLine("AAGAAGGAGAGAGAAGGAGAGAGAGAGAGAGAGGA");
+        var car_ = _carService.AddCarAsync(newCar);
 
-        var newListing = new Listing
-            {
-                Title = Model.Title,
-                Description = Model.Description,
-                Price = Model.Price,
-                ImageUrl = Model.ImageUrl,
-                UserId = user.Id,
-                Car = newCar
-            };
 
-        await _listingService.AddListingAsync(newListing);
 
-        navigationManager.NavigateTo("/cars");
+
+        navigationManager.NavigateTo("/listings");
     }
 }

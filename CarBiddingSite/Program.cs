@@ -27,6 +27,7 @@ builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options.UseSqlServer(cs);
 });
 
+builder.Services.AddBlazorBootstrap();
 builder.Services.AddScoped<CarService>();
 builder.Services.AddScoped<ListingServices>();
 var app = builder.Build();
