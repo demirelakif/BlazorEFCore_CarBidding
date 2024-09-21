@@ -1,6 +1,7 @@
 ﻿using CarBiddingSite.Models;
 using CarBiddingSite.Models.CarModels;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace CarBiddingSite.Services
 {
@@ -25,6 +26,18 @@ namespace CarBiddingSite.Services
             return await context.Listings.FirstOrDefaultAsync(l => l.Id == id);
 
         }
+
+        public async Task<Listing?> GetListingByIdNew(int id)
+        {
+            using var context = await _dbContextFactory.CreateDbContextAsync();
+            return await context.Listings
+                .Include(l => l.Car)            // Car'ı dahil ediyoruz
+                .ThenInclude(c => c.Brand)      // Car'ın Brand'ini de dahil ediyoruz
+                .Include(l => l.Car.Model) // Car'ın hasar kayıtlarını da dahil ediyoruz
+                .Include(l => l.Car.DamageRecords) // Car'ın hasar kayıtlarını da dahil ediyoruz
+                .FirstOrDefaultAsync(l => l.Id == id);
+        }
+
         public async Task AddListingAsync(Listing listing)
         {
             using var context = await _dbContextFactory.CreateDbContextAsync();
@@ -32,7 +45,7 @@ namespace CarBiddingSite.Services
             await context.Listings.AddAsync(listing);
             await context.SaveChangesAsync();
         }
-        public async void DeleteListingById(int id)
+        public async Task DeleteListingById(int id)
         {
             using var context = await _dbContextFactory.CreateDbContextAsync();
             await context.Listings.Where(listing => listing.Id == id).ExecuteDeleteAsync();
@@ -49,6 +62,7 @@ namespace CarBiddingSite.Services
                 selectedListing.Price = listing.Price;
                 selectedListing.ImageUrl = listing.ImageUrl;
                 selectedListing.Title = listing.Title;
+                selectedListing.CarId = listing.CarId;
             }
             await context.SaveChangesAsync();
             return selectedListing;

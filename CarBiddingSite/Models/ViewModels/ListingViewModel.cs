@@ -23,8 +23,10 @@ namespace CarBiddingSite.Models.ViewModels
         public int? SelectedModelId { get; set; }  // Model ID for dropdown selection
         public CarBiddingSite.Models.CarModels.DamageType SelectedDamageType { get; set; }  // Damage record ID for dropdown selection
         public string? SelectedDamageDescription { get; set; }
-        public DateTime SelectedDamageDate{ get; set; }
+        public DateTime SelectedDamageDate { get; set; } 
         public DateTime? CreatedDate { get; set; }
+
+        public CarBiddingSite.Models.CarModels.Colors Color { get; set; }
         public ICollection<DamageRecord> DamageRecords { get; set; } = new List<DamageRecord>();
 
         public Car Car { get; set; } = new Car();
@@ -34,17 +36,9 @@ namespace CarBiddingSite.Models.ViewModels
         public ListingViewModel()
         {
             CreatedDate = DateTime.UtcNow;
+            SelectedDamageDate = DateTime.UtcNow;
         }
 
 
-        public enum Color
-        {
-            Blue,
-            Red,
-            Green,
-            Yellow,
-            Black,
-            White
-        }
     }
 }

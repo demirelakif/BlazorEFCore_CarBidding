@@ -12,11 +12,11 @@
         public int ListingId { get; set; }
         public ICollection<DamageRecord>? DamageRecords { get; set; }
         public int Km { get; set; }
-        public Color? Color { get; set; }
+        public Colors? Color { get; set; }
     }
 
 
-    public enum Color
+    public enum Colors
     {
         Blue,
         Red,

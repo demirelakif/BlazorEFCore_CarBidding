@@ -33,7 +33,7 @@ else
             <div class="card">
                 @if (AuthenticatedUser is not null && car.UserId == AuthenticatedUser.Id)
                 {
-                    <span class="delete-icon" @onclick="() => HandleDeleteCar(car.Id, car.UserId)">&#10006;</span>
+                    <span class="delete-icon" @onclick="() => HandleDeleteListing(car.Id, car.UserId)">&#10006;</span>
                 }
                 <img @onclick="() => HandleDetailButton(car.Id)" src="@car.ImageUrl" alt="Car Image" />
                 <div @onclick="() => HandleDetailButton(car.Id)" class="card-content">
@@ -88,7 +88,7 @@ else
         navigationManager.NavigateTo("/addListing");
     }
 
-    private async Task HandleDeleteCar(int id, int userId)
+    private async Task HandleDeleteListing(int id, int userId)
     {
         if (AuthenticatedUser is not null && AuthenticatedUser.Id == userId)
         {
@@ -97,7 +97,7 @@ else
             {
                 _listings.Remove(carToRemove);
             }
-            await _carService.DeleteCarById(id);
+            await listingServices.DeleteListingById(id);
             StateHasChanged();
             await LoadListingsAsync();
 

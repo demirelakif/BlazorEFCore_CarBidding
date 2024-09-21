@@ -9,7 +9,7 @@
 @inject ListingServices _listingService;
 @inject AppDbContext appDbContext
 @inject NavigationManager navigationManager
-@attribute [Authorize(Roles = "User,Admin")]    
+@attribute [Authorize(Roles = "User,Admin")]
 @rendermode InteractiveServer
 
 <div class="container mt-5">
@@ -63,9 +63,15 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="price">Price:</label>
-                    <InputNumber id="price" class="form-control" @bind-Value="Model.Price"/>
-                    <ValidationMessage For="@(() => Model.Price)" />
+                    <label for="color">Color:</label>
+                    <select id="color" class="form-control" @bind="Model.Color">
+                       <option value="">Select Color</option>
+                    @foreach(var _color in Enum.GetValues(typeof(CarBiddingSite.Models.CarModels.Colors)))
+                    {
+                        <option value="@_color">@_color</option>
+                    }
+                    </select>
+                    <ValidationMessage For="@(() => Model.Color)" />
                 </div>
 
                 <h5 class="mt-4">Add Damage Records:</h5>
@@ -94,7 +100,7 @@
                     <ValidationMessage For="@(() => Model.SelectedDamageDate)" />
                 </div>
 
-                <button type="button" class="btn btn-primary" @onclick="AddDamageRecord">Add Damage Record</button>
+                <button type="button" class="btn btn-primary mb-2" @onclick="AddDamageRecord">Add Damage Record</button>
 
                 @if (Model.DamageRecords.Any())
                 {
@@ -121,7 +127,11 @@
                     <InputText id="image" class="form-control" @bind-Value="Model.ImageUrl" />
                     <ValidationMessage For="@(() => Model.ImageUrl)" />
                 </div>
-
+                <div class="form-group">
+                    <label for="price">Price:</label>
+                    <InputNumber id="price" class="form-control" @bind-Value="Model.Price" />
+                    <ValidationMessage For="@(() => Model.Price)" />
+                </div>
                 <button type="submit" class="btn btn-primary w-100">Add Listing</button>
             </EditForm>
         </div>
@@ -169,7 +179,6 @@
 
     private async Task HandleAddListing()
     {
-        Console.WriteLine("geldihandle");
         var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = appDbContext.Users
             .Where(u => u.UserName == authenticationState.User.Identity.Name)
@@ -181,6 +190,7 @@
             return;
         }
 
+        // Create the new Listing
         var newListing = new Listing
             {
                 Title = Model.Title,
@@ -191,23 +201,31 @@
             };
         await _listingService.AddListingAsync(newListing);
 
-        var carModel = appDbContext.CarModels.Where(b => b.Id == Model.SelectedModelId).FirstOrDefault();
+        // Ensure you fetch the correct CarModel and CarBrand from the DB
+        var carModel = appDbContext.CarModels.Where(m => m.Id == Model.SelectedModelId).FirstOrDefault();
         var carBrand = appDbContext.CarBrands.Where(b => b.Id == Model.SelectedBrandId).FirstOrDefault();
 
+        // Create the new Car
         var newCar = new Car
             {
-                BrandId= carBrand.Id,
+                BrandId = carBrand.Id,
                 ModelId = carModel.Id,
                 Km = Model.Car.Km,
                 Year = Model.Car.Year,
-                ListingId = newListing.Id
+                DamageRecords = Model.DamageRecords,
+                Color = Model.Color,
+                ListingId = newListing.Id // Set the ListingId immediately
             };
-        Console.WriteLine("AAGAAGGAGAGAGAAGGAGAGAGAGAGAGAGAGGA");
-        var car_ = _carService.AddCarAsync(newCar);
 
+        // Save the Car to the database and wait for it to complete
+        var carResult = await _carService.AddCarAsync(newCar);
 
+        // Now update the original listing with the CarId
+        newListing.CarId = carResult.Id;
+        await _listingService.UpdateListingAsync(newListing); // This will update the listing with the correct CarId
 
-
+        // Redirect to the listings page
         navigationManager.NavigateTo("/listings");
     }
+
 }

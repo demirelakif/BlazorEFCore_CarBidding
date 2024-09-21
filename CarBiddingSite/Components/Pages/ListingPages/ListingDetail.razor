@@ -7,7 +7,9 @@
 
 @if (listing is null)
 {
-    <p>No car in here</p>
+    <div class="text-center">
+        <p>No car in here</p>
+    </div>
 }
 else
 {
@@ -18,81 +20,92 @@ else
                 <h2>Edit Car</h2>
                 <div class="form-group">
                     <label>Title:</label>
-                    <input @bind="updatedListing.Title" />
+                    <input @bind="updatedListing.Title" class="form-control" />
                 </div>
                 <div class="form-group">
                     <label>Price:</label>
-                    <input type="number" @bind="updatedListing.Price" />
+                    <input type="number" @bind="updatedListing.Price" class="form-control" />
                 </div>
                 <div class="form-group">
                     <label>Description:</label>
-                    <textarea @bind="updatedListing.Description"></textarea>
+                    <textarea @bind="updatedListing.Description" class="form-control"></textarea>
                 </div>
                 <div class="form-group">
                     <label>Image URL:</label>
-                    <input @bind="updatedListing.ImageUrl" />
+                    <input @bind="updatedListing.ImageUrl" class="form-control" />
                 </div>
-                <button @onclick="HandleUpdate">Update</button>
-                <button @onclick="CloseEdit">Cancel</button>
+                <div class="mt-3">
+                    <button class="btn btn-success" @onclick="HandleUpdate">Update</button>
+                    <button class="btn btn-secondary" @onclick="CloseEdit">Cancel</button>
+                </div>
             </div>
         </div>
     }
 
     @if (!ShowEdit)
     {
-        <div class="container">
+        <div class="container mt-5">
             <AuthorizeView>
                 <Authorized>
-                    <button class="btn btn-primary" @onclick="EditCar">Edit</button>
+                    <button class="btn btn-primary mb-4" @onclick="EditCar">Edit</button>
                 </Authorized>
             </AuthorizeView>
-            <div class="title-price">
-                <h1>@listing.Title</h1>
-                <h1>@FormatPrice(listing.Price)</h1>
+
+            <div class="row">
+                <!-- Car Image -->
+                <div class="col-md-6">
+                    <img src="@listing.ImageUrl" alt="Listing Image" class="img-fluid rounded" />
+                </div>
+                <!-- Car Details -->
+                <div class="col-md-6">
+                    <div class="card shadow-lg p-4">
+                        <div class="mt-4 d-flex justify-content-between align-items-center">
+                            <h3>@listing.Title</h3>
+                            <button class="btn btn-success btn-lg ms-2 fs-5 fw-bolder">Make Offer</button>
+                        </div>
+
+                        <h5>@FormatPrice(listing.Price)</h5>
+                        <ul class="list-group">
+                            <li class="list-group-item"><strong>Brand:</strong> @listing.Car.Brand.Name</li>
+                            <li class="list-group-item"><strong>Origin Country:</strong> @listing.Car.Brand.OriginCountry</li>
+                            <li class="list-group-item"><strong>Model:</strong> @listing.Car.Model.ModelName</li>
+                            <li class="list-group-item"><strong>Horsepower:</strong> @listing.Car.Model.HP HP</li>
+                            <li class="list-group-item"><strong>Color:</strong> @listing.Car.Color</li>
+                        </ul>
+
+                        <!-- Damage Records -->
+                        <div class="mt-4">
+                            <h5>Damage Records:</h5>
+                            @if (listing.Car.DamageRecords != null && listing.Car.DamageRecords.Any())
+                            {
+                                <ul class="list-group">
+                                    @foreach (var damage in listing.Car.DamageRecords)
+                                    {
+                                        <li class="list-group-item">
+                                            <strong>Date:</strong> @damage.Time.Value.ToString("dd-MMM-yyyy")<br />
+                                            <strong>Type:</strong> @damage.DamageType<br />
+                                            <strong>Description:</strong> @damage.Description
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p>No damage records available.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="image-container">
-                <img src="@listing.ImageUrl" alt="Listing Image" class="img-fluid" />
+
+            <div class="mt-4">
+                <div class="card shadow-lg p-4">
+                    <h4>Description</h4>
+                    <p>@listing.Description</p>
+                </div>
             </div>
-            <div class="car-details mt-4">
-                <h4>Car Details</h4>
-                <ul class="list-group">
-                    @if(listing.Car.Brand is not null && listing.Car.Model is not null)
-                    {
-                        <li class="list-group-item"><strong>Brand:</strong> @listing.Car.Brand.Name</li>
-                        <li class="list-group-item"><strong>Origin Country:</strong> @listing.Car.Brand.OriginCountry</li>
-                        <li class="list-group-item"><strong>Model:</strong> @listing.Car.Model.ModelName</li>
-                        <li class="list-group-item"><strong>Horsepower:</strong> @listing.Car.Model.HP</li>
-                    }
-                </ul>
-            </div>
-            <div class="damage-records mt-4">
-                <h4>Damage Records</h4>
-                @if (listing.Car.DamageRecords.Any())
-                {
-                    <ul class="list-group">
-                        @foreach (var record in listing.Car.DamageRecords)
-                        {
-                            <li class="list-group-item">
-                                <strong>Date:</strong> @record.Time <br />
-                                <strong>Type:</strong> @record.DamageType <br />
-                                <strong>Description:</strong> @record.Description
-                            </li>
-                        }
-                    </ul>
-                }
-                else
-                {
-                    <p>No damage records available.</p>
-                }
-            </div>
-            <div class="price-button mt-4">
-                <span>@FormatPrice(listing.Price)</span>
-                <button class="btn btn-success">Make Offer</button>
-            </div>
-            <div class="description mt-4">
-                <h4>Description</h4>
-                <p>@listing.Description</p>
-            </div>
+
+
         </div>
     }
 }
@@ -106,11 +119,12 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        listing = await listingServices.GetListingById(id);
-        if (listing.Car.Model.ModelName is not null)
+        listing = await listingServices.GetListingByIdNew(id);
+        if (listing?.Car != null)
         {
-            Console.WriteLine(listing.Car.Model.ModelName);
+            Console.WriteLine(listing.Car.Km);  // Artık null değil, Km değerine erişebilirsiniz
         }
+
         updatedListing = listing != null ? new Listing
             {
                 Title = listing.Title,
@@ -120,6 +134,7 @@ else
                 Car = listing.Car
             } : new Listing();
     }
+
 
     private string FormatPrice(decimal? price)
     {
@@ -146,18 +161,6 @@ else
             await listingServices.UpdateListingAsync(updatedListing);
             listing = updatedListing;
             ShowEdit = false;
-        }
-    }
-
-    private string FormatNumber(decimal? num)
-    {
-        if (num is null)
-        {
-            throw new ArgumentNullException(nameof(num));
-        }
-        else
-        {
-            return num.Value.ToString("0");
         }
     }
 

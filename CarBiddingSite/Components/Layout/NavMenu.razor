@@ -1,6 +1,6 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">CarBiddingSite</a>
+        <a class="navbar-brand fw-bolder d-flex align-items-center" href="">  <Icon Name="IconName.EVFrontFill" Size="IconSize.x3" class="me-2" />Car Bidding</a>
     </div>
 </div>
 
@@ -9,20 +9,20 @@
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            <NavLink class="nav-link fw-bolder" href="" Match="NavLinkMatch.All">
+                <Icon Name="IconName.HouseFill" Size="IconSize.x3" class="me-2" /> Home
             </NavLink>
         </div>
-        <div class="nav-item px-3">
+        <div class="nav-item px-3 fw-bolder">
             <NavLink class="nav-link" href="listings">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Cars
+                <Icon Name="IconName.CarFrontFill" Size="IconSize.x3" class="me-2"/> Listings
             </NavLink>
         </div>
         <AuthorizeView Roles="Admin">
             <Authorized>
-                <div class="nav-item px-3">
+                <div class="nav-item px-3 fw-bolder">
                     <NavLink class="nav-link" href="adminPanel">
-                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Admin Panel
+                        <Icon Name="IconName.Command" Size="IconSize.x3" class="me-2" /> Admin Panel
                     </NavLink>
                 </div>
             </Authorized>
