@@ -64,12 +64,13 @@ else
                             <button class="btn btn-success btn-lg ms-2 fs-5 fw-bolder">Make Offer</button>
                         </div>
 
-                        <h5>@FormatPrice(listing.Price)</h5>
+                        <h5>@FormatPrice(listing.Price) TL</h5>
                         <ul class="list-group">
                             <li class="list-group-item"><strong>Brand:</strong> @listing.Car.Brand.Name</li>
                             <li class="list-group-item"><strong>Origin Country:</strong> @listing.Car.Brand.OriginCountry</li>
                             <li class="list-group-item"><strong>Model:</strong> @listing.Car.Model.ModelName</li>
                             <li class="list-group-item"><strong>Horsepower:</strong> @listing.Car.Model.HP HP</li>
+                            <li class="list-group-item"><strong>Km:</strong> @FormatPrice(listing.Car.Km) Km</li>
                             <li class="list-group-item"><strong>Color:</strong> @listing.Car.Color</li>
                         </ul>
 
@@ -144,7 +145,7 @@ else
         }
         else
         {
-            return price.Value.ToString("N0") + " TL";
+            return price.Value.ToString("N0");
         }
     }
 

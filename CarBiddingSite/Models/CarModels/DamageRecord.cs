@@ -6,6 +6,8 @@
         public CarBiddingSite.Models.CarModels.DamageType DamageType { get; set; }
         public string? Description { get; set; }
         public DateTime? Time { get; set; }
+        public Car ?Car { get; set; }
+        public int CarId { get; set; }
 
     }
 

@@ -27,20 +27,81 @@
 }
 else
 {
-    <div class="card-grid">
-        @foreach (var car in _listings)
+    <div>
+       
+        @if (IsGrid)
         {
-            <div class="card">
-                @if (AuthenticatedUser is not null && car.UserId == AuthenticatedUser.Id)
+            <Icon Name="IconName.CardList" Size="IconSize.x2" Color="IconColor.Primary" class="d-flex justify-content-end align-items-center mb-3" @onclick="HandleGrid" style="cursor: pointer;" />
+            <div class="card-grid">
+                @foreach (var car in _listings)
                 {
-                    <span class="delete-icon" @onclick="() => HandleDeleteListing(car.Id, car.UserId)">&#10006;</span>
+                    <div class="card">
+                        @if (AuthenticatedUser is not null && car.UserId == AuthenticatedUser.Id)
+                        {
+                            <span class="delete-icon" @onclick="() => HandleDeleteListing(car.Id, car.UserId)">&#10006;</span>
+                        }
+                        <img @onclick="() => HandleDetailButton(car.Id)" src="@car.ImageUrl" alt="Car Image" />
+                        <div @onclick="() => HandleDetailButton(car.Id)" class="card-content">
+                            <h5 class="card-title">@car.Title</h5>
+                            <p class="card-text">@FormatPrice(car.Price)</p>
+                        </div>
+                    </div>
                 }
-                <img @onclick="() => HandleDetailButton(car.Id)" src="@car.ImageUrl" alt="Car Image" />
-                <div @onclick="() => HandleDetailButton(car.Id)" class="card-content">
-                    <h5 class="card-title">@car.Title</h5>
-                    <p class="card-text">@FormatPrice(car.Price)</p>
-                </div>
             </div>
+        }
+        else
+        {
+            <Icon Name="IconName.CardImage" Size="IconSize.x2" Color="IconColor.Primary" class="d-flex justify-content-end align-items-center mb-3" style="cursor: pointer;" @onclick="HandleGrid" />
+            <Grid
+            TItem="Listing"
+            Class="table table-hover table-bordered table-striped"
+            AllowFiltering="true"
+            AllowPaging="true"
+            PageSize="5"
+            AllowRowClick="true"
+            OnRowClick="OnRowClick"
+            AllowSorting="true"
+            SelectionMode="GridSelectionMode.Multiple"
+            DataProvider="ListingDataProvider"
+            Responsive="true"
+            >
+                <GridColumns>
+                    <GridColumn TItem="Listing" HeaderText="Title" PropertyName="Title" SortKeySelector="item => item.Title">
+                        @context.Title
+                    </GridColumn>
+                    <GridColumn TItem="Listing" HeaderText="Brand Name" PropertyName="BrandName" SortKeySelector="item => item.Car.Brand.Name">
+                        @context.Car?.Brand?.Name
+                    </GridColumn>
+@*                     <GridColumn TItem="Listing" HeaderText="Origin Country" PropertyName="OriginCountry" SortKeySelector="item => item.Car.Brand.OriginCountry">
+                        @context.Car?.Brand?.OriginCountry
+                    </GridColumn> *@
+                    <GridColumn TItem="Listing" HeaderText="Model Name" PropertyName="ModelName" SortKeySelector="item => item.Car.Model.ModelName">
+                        @context.Car.Model.ModelName
+                    </GridColumn>
+                    <GridColumn TItem="Listing" HeaderText="Price" PropertyName="Price" SortKeySelector="item => item.Price">
+                        @FormatNumber(context.Price) TL
+                    </GridColumn>
+                    <GridColumn TItem="Listing" HeaderText="Km" PropertyName="Listing.Car.Km" SortKeySelector="item => item.Car != null ? item.Car.Km : 0">
+                        @FormatNumber(context.Car?.Km) Km
+                    </GridColumn>
+                    <GridColumn TItem="Listing" HeaderText="Hp" PropertyName="Car.Model.HP" SortKeySelector="item => item.Car != null ? item.Car.Model.HP : 0">
+                        @context.Car?.Model.HP
+                    </GridColumn>
+                    <GridColumn TItem="Listing" HeaderText="Year" PropertyName="Car.Year" SortKeySelector="item => item.Car != null ? item.Car.Year : 0">
+                        @context.Car?.Year        
+                    </GridColumn>
+                    <GridColumn TItem="Listing" HeaderText="Color" PropertyName="Car.Color" SortKeySelector="item => item.Car != null ? item.Car.Color : 0">
+                        @context.Car?.Color
+                    </GridColumn>
+                    <GridColumn TItem="Listing" HeaderText="Damage Count" PropertyName="Car.DamageCount" SortKeySelector="item => item.Car != null ? item.Car.DamageRecords.Count() : 0">
+                        @context.Car?.DamageRecords.Count()
+                    </GridColumn>
+                    <GridColumn TItem="Listing" HeaderText="Updated Date" PropertyName="UpdatedDate" SortKeySelector="item => item.UpdatedDate">
+                        @context.UpdatedDate.Value.ToString("dd - MM - yyyy")
+                    </GridColumn>
+                </GridColumns>
+
+            </Grid>
         }
     </div>
 }
@@ -49,6 +110,7 @@ else
     private List<Listing> _listings = new List<Listing>();
     private bool IsVisible = false;
     private User AuthenticatedUser;
+    private bool IsGrid = false;
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
@@ -71,10 +133,30 @@ else
         AuthenticatedUser = appDbContext.Users.FirstOrDefault(u => u.UserName == username);
         await LoadListingsAsync();
     }
+    private async Task<GridDataProviderResult<Listing>> ListingDataProvider(GridDataProviderRequest<Listing> request)
+    {
+        if (_listings is null)
+        {
+            _listings = await GetListing();
+        }
+
+        return await Task.FromResult(request.ApplyTo(_listings.Where(l => l.Car != null))); // Filter listings with non-null Car objects
+    }
+
+    private async Task<List<Listing>> GetListing()
+    {
+        return await listingServices.GetAllListingNew();
+    }
+
+    private void OnRowClick(GridRowEventArgs<Listing> args)
+    {
+        navigationManager.NavigateTo($"/listings/{args.Item.Id}");
+    }
+
 
     private async Task LoadListingsAsync()
     {
-        var result = await listingServices.GetAllListingsAsync();
+        var result = await listingServices.GetAllListingNew();
         _listings = result.ToList();
     }
 
@@ -86,6 +168,24 @@ else
     private void ShowAddCar()
     {
         navigationManager.NavigateTo("/addListing");
+    }
+
+    private void HandleGrid()
+    {
+        IsGrid = !IsGrid;
+        Console.WriteLine(IsGrid);
+    }
+
+    private string FormatNumber(decimal? num)
+    {
+        if (num is null)
+        {
+            throw new ArgumentNullException(nameof(num));
+        }
+        else
+        {
+            return num.Value.ToString("N0");
+        }
     }
 
     private async Task HandleDeleteListing(int id, int userId)

@@ -35,6 +35,12 @@ namespace CarBiddingSite
              .HasForeignKey(c => c.ModelId)
              .OnDelete(DeleteBehavior.Restrict); // Model silindiğinde ilişkili Cars silinmez
 
+            modelBuilder.Entity<Car>()
+                .HasMany(c=>c.DamageRecords)
+                .WithOne(d=>d.Car)
+                .HasForeignKey(d=>d.CarId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<Listing>()
                 .HasOne(l => l.Car)
                 .WithOne(c => c.Listing) // Car'ın yalnızca bir Listing'i olabilir

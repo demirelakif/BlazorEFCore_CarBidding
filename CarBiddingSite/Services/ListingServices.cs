@@ -38,6 +38,17 @@ namespace CarBiddingSite.Services
                 .FirstOrDefaultAsync(l => l.Id == id);
         }
 
+        public async Task<List<Listing>> GetAllListingNew()
+        {
+            using var context = await _dbContextFactory.CreateDbContextAsync();
+            return await context.Listings
+            .Include(l => l.Car)            // Car'ı dahil ediyoruz
+            .ThenInclude(c => c.Brand)      // Car'ın Brand'ini de dahil ediyoruz
+            .Include(l => l.Car.Model) // Car'ın hasar kayıtlarını da dahil ediyoruz
+            .Include(l => l.Car.DamageRecords) // Car'ın hasar kayıtlarını da dahil ediyoruz
+            .ToListAsync();
+        }
+
         public async Task AddListingAsync(Listing listing)
         {
             using var context = await _dbContextFactory.CreateDbContextAsync();
