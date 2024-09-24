@@ -13,9 +13,10 @@ namespace CarBiddingSite.Models
         public DateTime? UpdatedDate { get; set; }
         public int UserId { get; set; }
         public int CarId { get; set; }
-        public Car ?Car { get; set; }
+        public Car? Car { get; set; }
         //public ICollection<Request>? Requests { get; set; }
-        public User ?User { get; set; }
+        public User? User { get; set; }
+        public ICollection<Offer>? Offers { get; set; }
 
 
 

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarBiddingSite.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240921093727_ads")]
-    partial class ads
+    [Migration("20240924092658_userRequest")]
+    partial class userRequest
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -115,7 +115,7 @@ namespace CarBiddingSite.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CarId")
+                    b.Property<int>("CarId")
                         .HasColumnType("int");
 
                     b.Property<int>("DamageType")
@@ -171,6 +171,40 @@ namespace CarBiddingSite.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Listings");
+                });
+
+            modelBuilder.Entity("CarBiddingSite.Models.Offer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ListingId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("OfferPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("UserFromId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserToId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ListingId");
+
+                    b.HasIndex("UserFromId");
+
+                    b.HasIndex("UserToId");
+
+                    b.ToTable("Offers");
                 });
 
             modelBuilder.Entity("CarBiddingSite.Models.User", b =>
@@ -237,9 +271,13 @@ namespace CarBiddingSite.Migrations
 
             modelBuilder.Entity("CarBiddingSite.Models.CarModels.DamageRecord", b =>
                 {
-                    b.HasOne("CarBiddingSite.Models.CarModels.Car", null)
+                    b.HasOne("CarBiddingSite.Models.CarModels.Car", "Car")
                         .WithMany("DamageRecords")
-                        .HasForeignKey("CarId");
+                        .HasForeignKey("CarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Car");
                 });
 
             modelBuilder.Entity("CarBiddingSite.Models.Listing", b =>
@@ -251,6 +289,32 @@ namespace CarBiddingSite.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CarBiddingSite.Models.Offer", b =>
+                {
+                    b.HasOne("CarBiddingSite.Models.Listing", "Listing")
+                        .WithMany("Offers")
+                        .HasForeignKey("ListingId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("CarBiddingSite.Models.User", "UserFrom")
+                        .WithMany("OffersFrom")
+                        .HasForeignKey("UserFromId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CarBiddingSite.Models.User", "UserTo")
+                        .WithMany("OffersTo")
+                        .HasForeignKey("UserToId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Listing");
+
+                    b.Navigation("UserFrom");
+
+                    b.Navigation("UserTo");
                 });
 
             modelBuilder.Entity("CarBiddingSite.Models.CarModels.Car", b =>
@@ -273,11 +337,17 @@ namespace CarBiddingSite.Migrations
             modelBuilder.Entity("CarBiddingSite.Models.Listing", b =>
                 {
                     b.Navigation("Car");
+
+                    b.Navigation("Offers");
                 });
 
             modelBuilder.Entity("CarBiddingSite.Models.User", b =>
                 {
                     b.Navigation("Listings");
+
+                    b.Navigation("OffersFrom");
+
+                    b.Navigation("OffersTo");
                 });
 #pragma warning restore 612, 618
         }

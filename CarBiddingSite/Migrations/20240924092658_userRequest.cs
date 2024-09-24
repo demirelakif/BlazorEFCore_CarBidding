@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CarBiddingSite.Migrations
 {
     /// <inheritdoc />
-    public partial class ads : Migration
+    public partial class userRequest : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -124,6 +124,41 @@ namespace CarBiddingSite.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Offers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserToId = table.Column<int>(type: "int", nullable: false),
+                    UserFromId = table.Column<int>(type: "int", nullable: false),
+                    OfferPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ListingId = table.Column<int>(type: "int", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Offers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Offers_Listings_ListingId",
+                        column: x => x.ListingId,
+                        principalTable: "Listings",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Offers_Users_UserFromId",
+                        column: x => x.UserFromId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Offers_Users_UserToId",
+                        column: x => x.UserToId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "DamageRecords",
                 columns: table => new
                 {
@@ -132,7 +167,7 @@ namespace CarBiddingSite.Migrations
                     DamageType = table.Column<int>(type: "int", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Time = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CarId = table.Column<int>(type: "int", nullable: true)
+                    CarId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -141,7 +176,8 @@ namespace CarBiddingSite.Migrations
                         name: "FK_DamageRecords_Cars_CarId",
                         column: x => x.CarId,
                         principalTable: "Cars",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -174,6 +210,21 @@ namespace CarBiddingSite.Migrations
                 name: "IX_Listings_UserId",
                 table: "Listings",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Offers_ListingId",
+                table: "Offers",
+                column: "ListingId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Offers_UserFromId",
+                table: "Offers",
+                column: "UserFromId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Offers_UserToId",
+                table: "Offers",
+                column: "UserToId");
         }
 
         /// <inheritdoc />
@@ -181,6 +232,9 @@ namespace CarBiddingSite.Migrations
         {
             migrationBuilder.DropTable(
                 name: "DamageRecords");
+
+            migrationBuilder.DropTable(
+                name: "Offers");
 
             migrationBuilder.DropTable(
                 name: "Cars");

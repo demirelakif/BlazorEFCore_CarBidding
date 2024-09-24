@@ -1,21 +1,104 @@
 ﻿@page "/"
+@inject CarBiddingSite.Services.ListingServices listingService;
+@using CarBiddingSite.Models;
+@inject AppDbContext appDbContext;
+@rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 <AuthorizeView>
     <Authorized>
         <h1>@message</h1>
+        @foreach (var listing in Listings)
+        {
+            <div class="row border rounded-1 p-3 mb-3">
+                <div class="col-3 text-center">
+                    <img src="@listing.ImageUrl" class="img-fluid mb-2" alt="@listing.Title" />
+                    <h4>@listing.Title</h4>
+                    <h6 class="text-muted">@FormatPrice(listing.Price) TL</h6>
+                </div>
+                <div class="col-9">
+                    <h3 class="mb-3">Offers</h3>
+                    <div class="row">
+                        @if(listing.Offers.Count >= 1)
+                        {
+                            @foreach (var offer in listing.Offers)
+                            {
+                                <div class="col-md-4 mb-3">
+                                    <div class="border p-2 rounded">
+                                        <h6>From: @offer.UserFrom.UserName</h6>
+                                        <h6>Offer Price : @FormatPrice(offer.OfferPrice) TL</h6>
+                                        <h7>Message : @offer.Description</h7>
+
+                                        <!-- Accept and Deny Buttons -->
+                                        <div class="mt-3">
+                                            <button class="btn btn-success btn-sm me-2" @onclick="() => AcceptOffer(offer.Id)">Accept</button>
+                                            <button class="btn btn-danger btn-sm" @onclick="() => DenyOffer(offer.Id)">Deny</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <h6>No Offer Available</h6>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        }
+
     </Authorized>
 </AuthorizeView>
 
-Welcome to your new app.
-
-@code{
+@code {
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
-    private string ?message { get; set; }
+    private string? message { get; set; }
+    private User? AuthenticatedUser { get; set; }
+    private List<Listing> Listings { get; set; } = new();
     protected override async Task OnInitializedAsync()
     {
         var authenticationState = await authenticationStateTask;
-        message = $"{authenticationState.User.Identity.Name} Welcome!";
+        message = $"{authenticationState.User.Identity.Name} Welcome! , Check Your Listings:";
+        var username = authenticationState.User.Identity.Name;
+        AuthenticatedUser = appDbContext.Users.FirstOrDefault(u => u.UserName == username);
+        await GetOffersAndListing();
+    }
+
+    private async Task GetOffersAndListing()
+    {
+        if (AuthenticatedUser is not null)
+        {
+            Listings = await listingService.GetListingByUserId(AuthenticatedUser.Id);
+            if (Listings.Count >= 1)
+            {
+                Console.WriteLine(Listings.First().Car.Km);
+            }
+        }
+    }
+
+    private void AcceptOffer(int offerId)
+    {
+        // Accept offer logic
+        Console.WriteLine($"Accepted Offer with ID: {offerId}");
+    }
+
+    private void DenyOffer(int offerId)
+    {
+        // Deny offer logic
+        Console.WriteLine($"Denied Offer with ID: {offerId}");
+    }
+
+    private string FormatPrice(decimal? price)
+    {
+        if (price is null)
+        {
+            throw new ArgumentNullException(nameof(price));
+        }
+        else
+        {
+            return price.Value.ToString("N0");
+        }
     }
 }

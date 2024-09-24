@@ -10,5 +10,7 @@ namespace CarBiddingSite.Models
         public required string Password { get; set; }
         public string? Role { get; set; }
         public ICollection<Listing>? Listings { get; set; }
+        public ICollection<Offer>? OffersFrom { get; set; }
+        public ICollection<Offer>? OffersTo { get; set; }
     }
 }

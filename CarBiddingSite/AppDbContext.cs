@@ -17,6 +17,7 @@ namespace CarBiddingSite
         public DbSet<CarModel> CarModels { get; set; }
         public DbSet<DamageRecord> DamageRecords { get; set; }
         public DbSet<Listing> Listings { get; set; }
+        public DbSet<Offer> Offers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -52,7 +53,25 @@ namespace CarBiddingSite
                 .WithOne(l=>l.User)
                 .HasForeignKey(l=>l.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-            
+
+            modelBuilder.Entity<Listing>()
+                .HasMany(l => l.Offers)
+                .WithOne(o => o.Listing) // Car'ın yalnızca bir Listing'i olabilir
+                .HasForeignKey(o => o.ListingId)
+                .OnDelete(DeleteBehavior.Cascade); // Listing silindiğinde ilişkili Car da silinir
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.OffersFrom)
+                .WithOne(o => o.UserFrom)
+                .HasForeignKey(o => o.UserFromId)
+                .OnDelete(DeleteBehavior.Restrict); // Cascade Delete yerine Restrict
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.OffersTo)
+                .WithOne(o => o.UserTo)
+                .HasForeignKey(o => o.UserToId)
+                .OnDelete(DeleteBehavior.Restrict); // Her iki ilişkiyi kısıtlayabilirsiniz
+
+
 
 
         }

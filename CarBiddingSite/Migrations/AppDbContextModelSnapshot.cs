@@ -170,6 +170,40 @@ namespace CarBiddingSite.Migrations
                     b.ToTable("Listings");
                 });
 
+            modelBuilder.Entity("CarBiddingSite.Models.Offer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ListingId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("OfferPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("UserFromId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserToId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ListingId");
+
+                    b.HasIndex("UserFromId");
+
+                    b.HasIndex("UserToId");
+
+                    b.ToTable("Offers");
+                });
+
             modelBuilder.Entity("CarBiddingSite.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -254,6 +288,32 @@ namespace CarBiddingSite.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("CarBiddingSite.Models.Offer", b =>
+                {
+                    b.HasOne("CarBiddingSite.Models.Listing", "Listing")
+                        .WithMany("Offers")
+                        .HasForeignKey("ListingId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("CarBiddingSite.Models.User", "UserFrom")
+                        .WithMany("OffersFrom")
+                        .HasForeignKey("UserFromId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CarBiddingSite.Models.User", "UserTo")
+                        .WithMany("OffersTo")
+                        .HasForeignKey("UserToId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Listing");
+
+                    b.Navigation("UserFrom");
+
+                    b.Navigation("UserTo");
+                });
+
             modelBuilder.Entity("CarBiddingSite.Models.CarModels.Car", b =>
                 {
                     b.Navigation("DamageRecords");
@@ -274,11 +334,17 @@ namespace CarBiddingSite.Migrations
             modelBuilder.Entity("CarBiddingSite.Models.Listing", b =>
                 {
                     b.Navigation("Car");
+
+                    b.Navigation("Offers");
                 });
 
             modelBuilder.Entity("CarBiddingSite.Models.User", b =>
                 {
                     b.Navigation("Listings");
+
+                    b.Navigation("OffersFrom");
+
+                    b.Navigation("OffersTo");
                 });
 #pragma warning restore 612, 618
         }

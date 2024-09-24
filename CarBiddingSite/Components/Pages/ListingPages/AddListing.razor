@@ -46,7 +46,7 @@
 
                 <div class="form-group">
                     <label for="km">Kilometers:</label>
-                    <InputNumber id="km" class="form-control" @bind-Value="Model.Car.Km" />
+                    <InputNumber  id="km" class="form-control" @bind-Value="Model.Car.Km" />
                     <ValidationMessage For="@(() => Model.Car.Km)" />
                 </div>
 
@@ -132,6 +132,12 @@
                     <InputNumber id="price" class="form-control" @bind-Value="Model.Price" />
                     <ValidationMessage For="@(() => Model.Price)" />
                 </div>
+
+                <div class="form-group">
+                    <label for="price">asd:</label>
+                    <InputNumber id="price" class="form-control" @bind-Value="DoubleIs" TValue="double" />
+               
+                </div>
                 <button type="submit" class="btn btn-primary w-100">Add Listing</button>
             </EditForm>
         </div>
@@ -143,6 +149,7 @@
     public ListingViewModel Model { get; set; } = new();
     private List<CarBrand> CarBrands { get; set; } = new List<CarBrand>();
     private List<CarModel> CarModels { get; set; } = new List<CarModel>();
+    private double DoubleIs { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

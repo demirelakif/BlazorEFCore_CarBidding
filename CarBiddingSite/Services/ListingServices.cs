@@ -27,6 +27,27 @@ namespace CarBiddingSite.Services
 
         }
 
+        public async Task<List<Listing>>? GetListingByUserId(int id)
+        {
+            using var context = await _dbContextFactory.CreateDbContextAsync();
+            return await context.Listings.Where(l => l.UserId == id)
+                .Include(l => l.Car)
+                .ThenInclude(c => c.Brand)
+                .Include(l => l.Car.Model)
+                .Include(l => l.Offers)
+                .ThenInclude(o => o.UserFrom)
+                .Include(l => l.Car.DamageRecords)
+                .ToListAsync();
+
+        }
+
+        public async Task MakeOfferAsync(Offer offer)
+        {
+            using var context = await _dbContextFactory.CreateDbContextAsync();
+            await context.Offers.AddAsync(offer);
+            await context.SaveChangesAsync();
+        }
+
         public async Task<Listing?> GetListingByIdNew(int id)
         {
             using var context = await _dbContextFactory.CreateDbContextAsync();
